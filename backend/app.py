@@ -14,7 +14,7 @@ print(f"Data loaded: {df.shape}")
 def get_info():
     return jsonify({
         "samples": len(df),
-        "genes": len(df.columns) - 2,  # exclude 'samples' and 'type'
+        "genes": len(df.columns) - 2, 
         "subtypes": df['type'].unique().tolist()
     })
 
