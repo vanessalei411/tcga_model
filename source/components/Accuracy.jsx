@@ -12,12 +12,14 @@ export default function Accuracy() {
       .catch(() => { setError('Failed to load accuracy data.'); setLoading(false); });
   }, []);
 
+  // prevents user from thinking there has been a problem 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <p className="text-gray-400 animate-pulse">Training model — this may take a few seconds...</p>
     </div>
   );
 
+  // prints an error message
   if (error) return <p className="text-red-400">{error}</p>;
 
   const { accuracy, labels, confusion_matrix: cm, per_class } = data;
