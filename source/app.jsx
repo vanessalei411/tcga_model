@@ -2,6 +2,7 @@ import { useState } from "react";
 import ScatterPlot from "./components/ScatterPlot";
 import BoxPlot from "./components/BoxPlot";
 import Accuracy from "./components/Accuracy";
+import DataBrowser from './components/DataBrowser';
 
 const NAV_LINKS = ["Models", "Accuracy", "Data", "About"];
 
@@ -145,9 +146,11 @@ export default function App() {
           </div>
         </div>
       )}
-      {activePage === "Data" && (
-        <div className="pt-24 px-6 min-h-screen flex items-center justify-center">
-          <p className="text-gray-400 text-xl">Data explorer coming soon.</p>
+      {activePage === 'Data' && (
+        <div className="pt-24 px-6 min-h-screen">
+          <div className="max-w-6xl mx-auto">
+            <DataBrowser />
+          </div>
         </div>
       )}
       {activePage === "About" && (

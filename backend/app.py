@@ -127,5 +127,17 @@ def get_accuracy():
         "per_class": per_class
     })
 
+@app.route('/api/samples')
+def get_samples():
+    top_genes = [c for c in df.columns if c not in ['samples', 'type']][:5]
+    result = []
+    for _, row in df.iterrows():
+        result.append({
+            "sample_id": int(row['samples']),
+            "subtype": row['type'],
+            "genes": {g: round(row[g], 3) for g in top_genes}
+        })
+    return jsonify({"samples": result, "gene_columns": top_genes})
+
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
