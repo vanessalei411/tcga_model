@@ -3,6 +3,7 @@ import ScatterPlot from "./components/ScatterPlot";
 import BoxPlot from "./components/BoxPlot";
 import Accuracy from "./components/Accuracy";
 import DataBrowser from './components/DataBrowser';
+import About from './components/About';
 
 const NAV_LINKS = ["Models", "Accuracy", "Data", "About"];
 
@@ -153,10 +154,12 @@ export default function App() {
           </div>
         </div>
       )}
-      {activePage === "About" && (
-        <div className="pt-24 px-6 min-h-screen flex items-center justify-center">
-          <p className="text-gray-400 text-xl">About page coming soon.</p>
-        </div>
+      {activePage === 'About' && (
+      <div className="pt-24 px-6 min-h-screen">
+        <div className="max-w-5xl mx-auto">
+           <About />
+       </div>
+      </div>
       )}
     </div>
   );
