@@ -50,7 +50,7 @@ export default function BoxPlot() {
     fetchData(input.trim());
   };
 
-  // Scales
+  // to scale
   const allVals = chartData.flatMap(d => [d.min, d.max, ...(d.outliers || [])]);
   const yMin = allVals.length ? Math.min(...allVals) - 0.3 : 0;
   const yMax = allVals.length ? Math.max(...allVals) + 0.3 : 15;
@@ -60,7 +60,7 @@ export default function BoxPlot() {
   const boxW = slotW * 0.4;
   const xCenter = (i) => i * slotW + slotW / 2;
 
-  // Y axis ticks
+  // movement on the y axis
   const yTicks = Array.from({ length: 6 }, (_, i) => yMin + (i * (yMax - yMin)) / 5);
 
   return (
