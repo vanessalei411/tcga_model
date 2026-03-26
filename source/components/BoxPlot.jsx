@@ -30,7 +30,7 @@ export default function BoxPlot() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.get(`http://localhost:8080/api/boxplot?gene=${g}`);
+      const res = await axios.get(`https://tcga-model-backend.onrender.com/api/boxplot?gene=${g}`);
       const d = res.data.data;
       const formatted = Object.entries(d).map(([subtype, vals]) => ({
         subtype, ...vals, color: SUBTYPE_COLORS[subtype] || '#ffffff'

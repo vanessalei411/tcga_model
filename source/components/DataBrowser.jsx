@@ -22,7 +22,7 @@ export default function DataBrowser() {
   const PER_PAGE = 15;
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/samples')
+    axios.get('https://tcga-model-backend.onrender.com/api/samples')
       .then(res => {
         setSamples(res.data.samples);
         setGeneCols(res.data.gene_columns);

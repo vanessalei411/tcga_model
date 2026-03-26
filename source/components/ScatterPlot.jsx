@@ -32,7 +32,7 @@ export default function ScatterPlot() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.get(`http://localhost:8080/api/scatter?gene_x=${gx}&gene_y=${gy}`);
+      const res = await axios.get(`https://tcga-model-backend.onrender.com/api/scatter?gene_x=${gx}&gene_y=${gy}`);
       const d = res.data;
 
       // Group points by subtype

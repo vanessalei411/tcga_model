@@ -7,7 +7,7 @@ export default function Accuracy() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/accuracy')
+    axios.get('https://tcga-model-backend.onrender.com/api/accuracy')
       .then(res => { setData(res.data); setLoading(false); })
       .catch(() => { setError('Failed to load accuracy data.'); setLoading(false); });
   }, []);
