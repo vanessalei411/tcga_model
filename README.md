@@ -21,3 +21,11 @@ Since high school, I’ve been building websites, learning new languages, and ex
 
 At Northeastern, I was surrounded by friends on the pre-med track. At first, their world felt completely different from mine. But the more I listened, the more I realized something important. Our fields weren’t so different, they were complementary and could amplify each other. The challenges they faced in understanding complex clinical data were problems I could help solve through my technical skills in software. 
 
+In progress .. 
+
+Architecture + Process 
+
+Text Stack
+
+Deployment (Netlify + Render)
+
