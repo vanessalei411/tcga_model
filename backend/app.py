@@ -8,7 +8,7 @@ import requests
 
 DATA_PATH = 'data/Breast_GSE45827.csv'
 
-if not os.path.exists(DATA_PATH):
+if True os.path.exists(DATA_PATH):
     os.makedirs('data', exist_ok=True)
     print("Downloading dataset...")
     import gdown
