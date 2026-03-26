@@ -4,6 +4,28 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 import os
+import requests
+
+DATA_PATH = 'data/Breast_GSE45827.csv'
+
+if not os.path.exists(DATA_PATH):
+    os.makedirs('data', exist_ok=True)
+    print("Downloading dataset...")
+    url = 'https://drive.google.com/uc?export=download&id=16DloVkpkGM2MvX1grnvL7yRcJLMD47CZ'
+    session = requests.Session()
+    r = session.get(url, stream=True)
+    # google drive issue with large files n/ viruses 
+    token = None
+    for key, value in r.cookies.items():
+        if key.startswith('download_warning'):
+            token = value
+    if token:
+        r = session.get(url, params={'confirm': token}, stream=True)
+    with open(DATA_PATH, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=32768):
+            if chunk:
+                f.write(chunk)
+    print("Download complete.")
 
 app = Flask(__name__)
 CORS(app)
