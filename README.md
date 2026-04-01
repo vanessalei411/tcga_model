@@ -49,7 +49,53 @@ At Northeastern, I was surrounded by friends on the pre-med track. At first, the
 
 ## Architecture & Process
 
-> 🚧 In progress...
+```
+TCGA RNA-Seq Dataset (54,675 genes × 151 patients)
+        │
+        ▼
+┌─────────────────────────────┐
+│     Data Processing Layer   │
+│  Pandas · SciPy · Scikit-learn │
+│  - Variance filtering       │
+│  - Clustering (unsupervised)│
+│  - Feature normalization    │
+└────────────┬────────────────┘
+             │
+             ▼
+┌─────────────────────────────┐
+│     ML Classification       │
+│      Random Forest          │
+│   96.77% accuracy across    │
+│   54,675 genomic features   │
+└────────────┬────────────────┘
+             │
+             ▼
+┌─────────────────────────────┐
+│      Flask REST API         │
+│  - Serves predictions       │
+│  - Exposes gene expression  │
+│    data via JSON endpoints  │
+│  Deployed on Render         │
+└────────────┬────────────────┘
+             │  HTTP (JSON)
+             ▼
+┌─────────────────────────────┐
+│      React Frontend         │
+│  Recharts · Dynamic filters │
+│  - Interactive visualizations│
+│  - Subtype comparisons      │
+│  - Prediction vs. actual    │
+│  Deployed on Netlify        │
+└─────────────────────────────┘
+```
+
+### How It Works
+
+1. **Data ingestion** — Raw RNA-Seq expression data from 151 TCGA breast cancer patients is loaded and processed using Pandas and SciPy.
+2. **Preprocessing** — Gene features are normalized and filtered; clustering is applied to surface natural groupings across the high-dimensional feature space.
+3. **Classification** — A Random Forest model trained on the processed data classifies breast cancer subtypes with 96.77% accuracy across 54,675 features.
+4. **API layer** — Flask exposes RESTful endpoints that serve both raw expression data and model predictions as JSON.
+5. **Visualization** — The React frontend fetches from the Flask API and renders interactive charts (via Recharts), allowing users to filter by gene, zoom into markers, and compare predicted vs. actual cancer subtypes.
 
 ---
 
