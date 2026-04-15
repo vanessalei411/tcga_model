@@ -46,7 +46,9 @@ def get_cached_model():
 
         # n_jobs=1 avoids forking multiple worker processes that each copy the
         # full dataset into memory — the main cause of the 512 MB OOM crashes.
-        clf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=1)
+        # n_estimators=50 (down from 100) halves peak memory during training,
+        # which is critical on Render's free 512 MB tier.
+        clf = RandomForestClassifier(n_estimators=50, random_state=42, n_jobs=1)
         clf.fit(X_train, y_train)
 
         labels = sorted(list(set(y)))
@@ -184,12 +186,9 @@ def get_samples():
     return jsonify({"samples": result, "gene_columns": top_genes})
 
 
-# Warm up the model at startup so the first real request isn't slow
-with app.app_context():
-    try:
-        get_cached_model()
-    except Exception as e:
-        print(f"Model warm-up failed: {e}")
+# Model trains lazily on the first /api/accuracy request.
+# Do NOT warm up at startup — on Render's free tier (512 MB hard limit)
+# training at boot causes an OOM before the server can serve any traffic.
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
