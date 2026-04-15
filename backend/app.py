@@ -8,7 +8,7 @@ import requests
 
 DATA_PATH = 'data/Breast_GSE45827.csv'
 
-if not os.path.exists(DATA_PATH)::
+if not os.path.exists(DATA_PATH):
     os.makedirs('data', exist_ok=True)
     print("Downloading dataset...")
     import gdown
@@ -25,6 +25,37 @@ CORS(app)
 df = pd.read_csv('data/Breast_GSE45827.csv')
 print(f"Data loaded: {df.shape}")
 
+# Cache for the trained model — trained once on startup, reused on every request
+_model_cache = {}
+
+
+def get_cached_model():
+    """Train the Random Forest once and cache it. Returns (clf, X_test, y_test, labels)."""
+    if 'rf' not in _model_cache:
+        from sklearn.ensemble import RandomForestClassifier
+        from sklearn.model_selection import train_test_split
+
+        print("Training Random Forest model (first request)...")
+        genes = [c for c in df.columns if c not in ['samples', 'type']]
+        X = df[genes].values
+        y = df['type'].values
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42, stratify=y
+        )
+
+        # n_jobs=1 avoids forking multiple worker processes that each copy the
+        # full dataset into memory — the main cause of the 512 MB OOM crashes.
+        clf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=1)
+        clf.fit(X_train, y_train)
+
+        labels = sorted(list(set(y)))
+        _model_cache['rf'] = (clf, X_test, y_test, labels)
+        print("Model training complete.")
+
+    return _model_cache['rf']
+
+
 @app.route('/api/info')
 def get_info():
     return jsonify({
@@ -33,10 +64,12 @@ def get_info():
         "subtypes": df['type'].unique().tolist()
     })
 
+
 @app.route('/api/genes')
 def get_genes():
     genes = [c for c in df.columns if c not in ['samples', 'type']]
     return jsonify(genes)
+
 
 @app.route('/api/scatter')
 def get_scatter():
@@ -74,6 +107,7 @@ def get_scatter():
         "trendline": trendline
     })
 
+
 @app.route('/api/boxplot')
 def get_boxplot():
     gene = request.args.get('gene')
@@ -102,26 +136,15 @@ def get_boxplot():
 
     return jsonify({"gene": gene, "data": result})
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from sklearn.preprocessing import LabelEncoder
 
 @app.route('/api/accuracy')
 def get_accuracy():
-    genes = [c for c in df.columns if c not in ['samples', 'type']]
-    X = df[genes].values
-    y = df['type'].values
+    from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
+    clf, X_test, y_test, labels = get_cached_model()
 
-    clf = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
-    clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
 
-    labels = sorted(list(set(y)))
     cm = confusion_matrix(y_test, y_pred, labels=labels).tolist()
     report = classification_report(y_test, y_pred, labels=labels, output_dict=True)
 
@@ -142,19 +165,32 @@ def get_accuracy():
         "per_class": per_class
     })
 
+
 @app.route('/api/samples')
 def get_samples():
     top_genes = [c for c in df.columns if c not in ['samples', 'type']][:5]
-    result = []
-    for _, row in df.iterrows():
-        result.append({
-            "sample_id": int(row['samples']),
-            "subtype": row['type'],
-            "genes": {g: round(row[g], 3) for g in top_genes}
-        })
+
+    # Use itertuples() instead of iterrows() — significantly faster and
+    # avoids creating a Series object for every row.
+    result = [
+        {
+            "sample_id": int(row.samples),
+            "subtype": row.type,
+            "genes": {g: round(getattr(row, g), 3) for g in top_genes}
+        }
+        for row in df.itertuples(index=False)
+    ]
+
     return jsonify({"samples": result, "gene_columns": top_genes})
 
-# changed port to listen to render 
+
+# Warm up the model at startup so the first real request isn't slow
+with app.app_context():
+    try:
+        get_cached_model()
+    except Exception as e:
+        print(f"Model warm-up failed: {e}")
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
